@@ -748,10 +748,28 @@
             if (typeof value !== 'string') {
                 return value;
             }
-            try {
-                return decodeURIComponent(escape(value));
-            } catch (error) {
+            if (!/[ÃÂÐ]/.test(value)) {
                 return value;
+            }
+            try {
+                var decoded = decodeURIComponent(escape(value));
+                return decoded.replace(/\u00d1/g, 'Ñ').replace(/\u00f1/g, 'ñ');
+            } catch (error) {
+                return value
+                    .replace(/Ã¡/g, 'á')
+                    .replace(/Ã©/g, 'é')
+                    .replace(/Ã­/g, 'í')
+                    .replace(/Ã³/g, 'ó')
+                    .replace(/Ãº/g, 'ú')
+                    .replace(/Ã/g, 'Á')
+                    .replace(/Ã‰/g, 'É')
+                    .replace(/Ã/g, 'Í')
+                    .replace(/Ã“/g, 'Ó')
+                    .replace(/Ãš/g, 'Ú')
+                    .replace(/Ã±/g, 'ñ')
+                    .replace(/Ã‘/g, 'Ñ')
+                    .replace(/Ã¼/g, 'ü')
+                    .replace(/Ãœ/g, 'Ü');
             }
         }
 
@@ -1315,12 +1333,13 @@
             var foto = feature.properties['foto1'] !== null
                 ? 'images/' + String(feature.properties['foto1']).replace(/[\\/:]/g, '_').trim().replace(/'/g, '\'').replace(/"/g, '&quot;')
                 : '';
+            var fotoThumb = foto ? foto.replace('images/', 'images/thumbs/') : '';
             var popupContent = '<div class="survey-popup">\
                     <h3>' + autolinker.link(comunidad) + '</h3>\
                     <div class="survey-popup-meta-group">\
                         <div class="survey-popup-meta"><i class="fas fa-users" aria-hidden="true"></i><strong>Habitantes</strong><span>' + autolinker.link(habitantes) + '</span></div>\
                     </div>\
-                    ' + (foto ? '<figure><img src="' + foto + '" alt="' + comunidad + '"></figure>' : '') + '\
+                    ' + (foto ? '<figure><a href="' + foto + '" target="_blank" rel="noopener noreferrer"><img src="' + fotoThumb + '" alt="' + comunidad + '" loading="lazy" decoding="async"></a></figure>' : '') + '\
                     <div class="survey-popup-details">\
                         <div class="survey-popup-detail"><i class="fas fa-calendar-alt" aria-hidden="true"></i><span><strong>Levantamiento:</strong> ' + autolinker.link(fechaLevantamiento) + '</span></div>\
                         <div class="survey-popup-detail"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span><strong>Coordenadas:</strong> ' + autolinker.link(coordenadas) + '</span></div>\
