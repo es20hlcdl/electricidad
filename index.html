@@ -1,0 +1,1429 @@
+﻿<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <style>
+        :root {
+            --font-ui: "Trebuchet MS", "Gill Sans", Verdana, sans-serif;
+            --font-heading: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        }
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            font-family: var(--font-ui);
+            color: #304036;
+        }
+        .leaflet-container {
+            background: #f6f3eb;
+            font-family: var(--font-ui);
+        }
+        .leaflet-control-layers {
+            min-width: 232px;
+            max-height: 48vh;
+            overflow: hidden auto;
+            display: block;
+            align-items: stretch;
+            font-size: 12px;
+            border: 1px solid rgba(214, 205, 188, 0.92);
+            border-radius: 16px;
+            box-shadow: 0 14px 30px rgba(54, 67, 60, 0.14);
+            background: rgba(255, 252, 246, 0.94);
+            backdrop-filter: blur(8px);
+            padding: 0;
+        }
+        .leaflet-control-layers-expanded {
+            padding: 14px 14px 12px 14px;
+        }
+        .leaflet-control-layers form {
+            margin: 0;
+        }
+        .leaflet-control-layers-list {
+            display: block;
+            width: 100%;
+        }
+        .leaflet-control-layers-toggle,
+        .leaflet-control-layers-expanded .leaflet-control-layers-toggle,
+        .leaflet-control-layers-expanded .leaflet-control-layers-toggle::after,
+        .leaflet-control-layers-base {
+            display: none !important;
+        }
+        .leaflet-top.leaflet-right .leaflet-control {
+            margin-top: 12px;
+            margin-right: 12px;
+        }
+        .leaflet-bottom.leaflet-left .leaflet-control {
+            margin-left: 12px;
+            margin-bottom: 12px;
+        }
+        .map-legend {
+            min-width: 210px;
+            max-width: 250px;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 12px 13px;
+            border: 1px solid rgba(217, 210, 195, 0.9);
+            border-radius: 14px;
+            background: rgba(255, 252, 246, 0.9);
+            box-shadow: 0 10px 24px rgba(54, 67, 60, 0.12);
+            backdrop-filter: blur(8px);
+            color: #304036;
+            display: flex;
+            flex-direction: column;
+        }
+        .map-legend h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #23445d;
+        }
+        .legend-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2dacb;
+        }
+        .legend-section:last-of-type {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .legend-section:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        .legend-title {
+            margin: 0 0 7px 0;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-ui);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #6b6f5f;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        .layers-panel-heading {
+            margin: 0 0 10px 0;
+            padding: 0 0 10px 0;
+            border-bottom: 1px solid #e2dacb;
+        }
+        .layers-panel-title {
+            margin: 0;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #23445d;
+        }
+        .leaflet-control-layers-overlays label {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px 0;
+            color: #494d43;
+            line-height: 1.25;
+        }
+        .leaflet-control-layers-overlays::before {
+            content: "Capas";
+            display: block;
+            margin: 0 0 10px 0;
+            padding: 0;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #23445d;
+        }
+        .leaflet-control-layers-selector {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 24px;
+            height: 14px;
+            border: 1px solid rgba(109, 126, 128, 0.6);
+            border-radius: 999px;
+            background: rgba(111, 129, 132, 0.28);
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.18s ease, border-color 0.18s ease;
+        }
+        .leaflet-control-layers-overlays .leaflet-control-layers-selector {
+            margin-right: 10px;
+            flex: 0 0 24px;
+        }
+        .leaflet-control-layers-selector::before {
+            content: "";
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+            transition: transform 0.18s ease;
+        }
+        .leaflet-control-layers-selector:checked {
+            background: #607f80;
+            border-color: #607f80;
+        }
+        .leaflet-control-layers-selector:checked::before {
+            transform: translateX(10px);
+        }
+        .leaflet-control-layers-separator {
+            margin: 10px 0;
+            border-top: 1px solid #e2dacb;
+        }
+        .leaflet-control-layers .layers-inline-legend {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2dacb;
+        }
+        .leaflet-control-layers .map-legend {
+            min-width: 0;
+            max-width: none;
+            height: auto;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        .leaflet-control-layers .legend-section {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        .leaflet-control-layers .legend-communities {
+            overflow: visible;
+            padding-right: 0;
+        }
+        .leaflet-control-layers .map-legend h4 {
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #2d4f67;
+        }
+        .leaflet-control-layers .legend-item {
+            margin: 4px 0;
+        }
+        .legend-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex: 0 0 14px;
+        }
+        .legend-box {
+            width: 16px;
+            height: 12px;
+            border: 1px solid #b9b39f;
+            border-radius: 3px;
+            flex: 0 0 16px;
+        }
+        .legend-line {
+            width: 24px;
+            height: 0;
+            border-top-width: 2px;
+            border-top-style: solid;
+            flex: 0 0 24px;
+        }
+        .legend-line.dashed {
+            border-top-style: dashed;
+        }
+        .layers-symbol {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .layers-symbol.line {
+            width: 22px;
+            height: 0;
+            border-top: 2px solid #000;
+        }
+        .layers-symbol.line.thin {
+            border-top-width: 1px;
+        }
+        .layers-symbol.line.dashed {
+            border-top-style: dashed;
+        }
+        .layers-symbol.box {
+            width: 14px;
+            height: 10px;
+            border: 1px solid #b9b39f;
+            border-radius: 3px;
+        }
+        .layers-symbol.point {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #000;
+        }
+        .legend-communities {
+            max-height: none;
+            flex: 1;
+            overflow: auto;
+            padding-right: 4px;
+        }
+        .legend-district-group {
+            margin-bottom: 10px;
+        }
+        .legend-district-name {
+            margin: 0 0 4px 0;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-ui);
+            letter-spacing: 0.3px;
+            color: #23445d;
+            text-transform: uppercase;
+        }
+        .map-label {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .district-label {
+            color: #2f3a33;
+            font-size: 11px;
+        }
+        .community-focus-label {
+            font-family: var(--font-ui);
+            color: #22486a;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.05;
+            text-align: center;
+            white-space: nowrap;
+            text-shadow:
+                -1px -1px 0 rgba(255,252,246,0.98),
+                1px -1px 0 rgba(255,252,246,0.98),
+                -1px 1px 0 rgba(255,252,246,0.98),
+                1px 1px 0 rgba(255,252,246,0.98),
+                0 2px 8px rgba(255,252,246,0.9);
+        }
+        .municipality-label {
+            color: #3c3328;
+            font-size: 13px;
+        }
+        .leaflet-control-resetview {
+            clear: none !important;
+            margin-right: 8px !important;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+            background: #fff;
+            overflow: hidden;
+        }
+        .leaflet-control-resetview button {
+            display: block;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            background: #fff;
+            font-family: var(--font-ui);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1;
+            color: #23445d;
+            cursor: pointer;
+        }
+        .leaflet-control-resetview button:hover {
+            background: #f4f7f5;
+        }
+        .survey-popup {
+            min-width: 300px;
+            color: #31433d;
+        }
+        .survey-popup h3 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            line-height: 1.2;
+            color: #23445d;
+            text-transform: uppercase;
+        }
+        .survey-popup-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 0 10px 0;
+            padding: 5px 9px;
+            border: 1px solid #d9d8ca;
+            border-radius: 999px;
+            background: #f7f4ec;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #5f675d;
+            font-family: var(--font-ui);
+        }
+        .survey-popup-meta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 10px 0;
+        }
+        .survey-popup-meta-group .survey-popup-meta {
+            margin: 0;
+        }
+        .survey-popup-meta strong {
+            color: #23445d;
+        }
+        .survey-popup-meta i,
+        .survey-popup-detail i {
+            color: #8f9c69;
+            font-size: 11px;
+        }
+        .survey-popup figure {
+            margin: 0;
+        }
+        .survey-popup img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #d8cfbe;
+            box-shadow: 0 6px 16px rgba(60, 51, 40, 0.08);
+        }
+        .survey-popup-details {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .survey-popup-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border: 1px solid #e0d8c9;
+            border-radius: 10px;
+            background: #faf7f1;
+            font-size: 11.5px;
+            line-height: 1.35;
+            color: #4a554e;
+        }
+        .survey-popup-detail strong {
+            color: #23445d;
+        }
+        .panel-intro {
+            position: relative;
+            margin: 0 0 10px 0;
+            padding: 13px 14px 12px 14px;
+            border-radius: 12px;
+            background: transparent;
+            box-shadow: none;
+            color: #f8f4ea;
+            overflow: hidden;
+        }
+        .panel-intro::after {
+            content: "";
+            position: absolute;
+            inset: auto -36px -48px auto;
+            width: 165px;
+            height: 165px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(156, 187, 206, 0.08) 0%, rgba(156, 187, 206, 0) 68%);
+            pointer-events: none;
+        }
+        .panel-kicker {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 5px 0;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(248, 244, 234, 0.74);
+        }
+        .panel-title {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.04;
+            letter-spacing: 0.2px;
+            color: #fffaf0;
+        }
+        .panel-description {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 9px 0 0 0;
+            font-size: 13px;
+            line-height: 1.42;
+            color: rgba(248, 244, 234, 0.88);
+        }
+        .panel-credit {
+            position: relative;
+            z-index: 1;
+            margin: 10px 0 0 0;
+            font-size: 11px;
+            line-height: 1.35;
+            letter-spacing: 0.3px;
+            color: rgba(248, 244, 234, 0.72);
+        }
+        .panel-credit strong {
+            color: #fffaf0;
+        }
+        .panel-metrics {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 0.95fr)) minmax(0, 1.15fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .panel-stat {
+            min-height: 56px;
+            padding: 8px 12px 7px 12px;
+            border: 1px solid rgba(214, 227, 235, 0.14);
+            border-radius: 12px;
+            background: rgba(214, 227, 235, 0.06);
+            backdrop-filter: blur(3px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .panel-stat__value {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+            color: #fffaf0;
+        }
+        .panel-stat__value--text {
+            font-size: 18px;
+            line-height: 1.1;
+        }
+        .panel-stat__label {
+            display: block;
+            margin-top: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.9px;
+            text-transform: uppercase;
+            color: rgba(248, 244, 234, 0.72);
+        }
+        .panel-stat__meta {
+            display: block;
+            margin-top: 2px;
+            font-size: 11px;
+            line-height: 1.2;
+            color: rgba(248, 244, 234, 0.86);
+        }
+        .panel-stat--highlight .panel-stat__label {
+            margin: 4px 0 0 0;
+            font-size: 10px;
+            letter-spacing: 0.8px;
+        }
+        .panel-stat--highlight .panel-stat__value {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        .panel-stat--highlight {
+            justify-content: center;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        .panel-note {
+            position: relative;
+            z-index: 1;
+            margin: 11px 0 0 0;
+            font-size: 11.5px;
+            line-height: 1.35;
+            color: rgba(248, 244, 234, 0.8);
+        }
+        .panel-context-note {
+            position: relative;
+            z-index: 1;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border: 1px solid rgba(214, 227, 235, 0.14);
+            border-radius: 12px;
+            background: rgba(214, 227, 235, 0.05);
+            font-size: 11.5px;
+            line-height: 1.4;
+            color: rgba(248, 244, 234, 0.84);
+        }
+        .panel-context-note strong {
+            color: #fffaf0;
+        }
+        .habitants-panel {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 900;
+            width: 700px;
+            max-width: calc(100vw - 260px);
+            height: calc(100vh - 48px);
+            max-height: calc(100vh - 48px);
+            overflow: auto;
+            box-sizing: border-box;
+            padding: 10px 10px 8px 10px;
+            border: 1px solid rgba(104, 121, 131, 0.62);
+            border-radius: 16px;
+            background:
+                linear-gradient(180deg, rgba(63, 76, 84, 0.97) 0%, rgba(90, 104, 113, 0.96) 46%, rgba(104, 118, 123, 0.95) 100%);
+            box-shadow: 0 16px 32px rgba(35, 47, 54, 0.2);
+            backdrop-filter: blur(8px);
+            color: #eef2eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .habitants-panel h3 {
+            margin: 0 0 8px 0;
+            padding-left: 4px;
+            text-align: left;
+            font-size: 12px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #d6e4ec;
+        }
+        .habitants-chart {
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .habitants-chart svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            font-family: var(--font-ui);
+        }
+        .chart-clickable {
+            cursor: pointer;
+        }
+        @media (max-width: 900px) {
+            .habitants-panel {
+                position: fixed;
+                left: 10px;
+                right: 10px;
+                top: auto;
+                bottom: 10px;
+                width: auto;
+                height: 42vh;
+                max-height: 42vh;
+            }
+            .panel-title {
+                font-size: 23px;
+            }
+            .panel-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        </style>
+        <title>Diagnóstico Territorial de Energía Solar</title>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div id="habitants-panel" class="habitants-panel">
+            <div class="panel-intro">
+                <p class="panel-kicker">Levantamiento de datos para proyectos de energía solar</p>
+                <h1 class="panel-title">Diagnóstico territorial</h1>
+                <p class="panel-description">
+                    Visualización del levantamiento realizado en San Miguel de Velasco para identificar
+                    concentración de habitantes y viviendas sin acceso a energía eléctrica.
+                </p>
+                <div class="panel-metrics">
+                    <div class="panel-stat">
+                        <span class="panel-stat__value" id="project-total-habitants">0</span>
+                        <span class="panel-stat__label">Personas sin energía eléctrica</span>
+                    </div>
+                    <div class="panel-stat">
+                        <span class="panel-stat__value" id="project-total-communities">0</span>
+                        <span class="panel-stat__label">Comunidades Identificadas</span>
+                    </div>
+                    <div class="panel-stat">
+                        <span class="panel-stat__value" id="project-total-districts">0</span>
+                        <span class="panel-stat__label">Distritos por intervenir</span>
+                    </div>
+                    <div class="panel-stat panel-stat--highlight">
+                        <span class="panel-stat__value panel-stat__value--text" id="project-top-community">Sin dato</span>
+                        <span class="panel-stat__label">Mayor Concentración de habitantes</span>
+                    </div>
+                </div>
+                
+                <div class="panel-context-note">
+                    <strong>Nota:</strong> La división política administrativa fue proporcionada por el GAMSMV.
+                    Algunas comunidades presentan conflictos de límites con otro municipio.
+                    Por criterios de privacidad, no se exhiben todos los registros levantados.
+                </div>            
+            <h3>Habitantes por comunidad</h3>
+            <div id="habitants-chart" class="habitants-chart"></div>
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/data_0.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl: false,
+            maxZoom: 28,
+            minZoom: 1
+        }).fitBounds([[-17.377753329268344,-61.78039533449591],[-16.154185901668498,-60.02084718141428]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        map.attributionControl.addAttribution('Elaborado por <a href="https://es20hlcdl.github.io/gustavo-caceres-martinez/" target="_blank" rel="noopener noreferrer">Gustavo C&aacute;ceres Mart&iacute;nez</a> - <a href="https://www.linkedin.com/in/gustavo-c%C3%A1ceres-sig/" target="_blank" rel="noopener noreferrer">LinkedIn</a> - <a href="https://www.spatialnode.net/es20hlcdl" target="_blank" rel="noopener noreferrer">Spatialnode</a> - <a href="mailto:es20.hlcdl@gmail.com">Email</a> | &copy; OpenStreetMap contributors &copy; CARTO');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var baseLayerClaro = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 20,
+            attribution: ''
+        });
+        baseLayerClaro.addTo(map);
+        var overlays = {};
+        var bounds_group = new L.featureGroup([]);
+        var districtPalette = ['#dbe7dd', '#e7decf', '#d7e3ea', '#ece4cf', '#e5d7cf', '#dfe5d5'];
+        var districtColorOverrides = {
+            'SAPOCO': '#f0dcc9',
+            'NUEVA ESPERANZA': '#efe1c7'
+        };
+        var districtColors = {};
+        var districtColorIndex = 0;
+        var districtGeojsonData = null;
+        var sanMiguelBounds = null;
+        var communityPalette = ['#d98f2b', '#2d6a73', '#73966f', '#bf6c3b', '#5d7ea8', '#8b9b6b', '#b88645', '#4f7c82', '#9c7a52', '#6d8f8f', '#c27d38', '#6f8670'];
+        var communityColors = {};
+        var communityColorIndex = 0;
+        var focusedCommunityLabel = null;
+        var layersControl = null;
+        var legendContainer = null;
+
+        function createPane(name, zIndex) {
+            if (!map.getPane(name)) {
+                map.createPane(name);
+            }
+            map.getPane(name).style.zIndex = zIndex;
+            map.getPane(name).style.mixBlendMode = 'normal';
+        }
+        createPane('pane_districts', 210);
+        createPane('pane_lines', 320);
+        createPane('pane_boundaries', 340);
+        createPane('pane_points', 420);
+        createPane('pane_labels', 650);
+
+        function fixText(value) {
+            if (typeof value !== 'string') {
+                return value;
+            }
+            try {
+                return decodeURIComponent(escape(value));
+            } catch (error) {
+                return value;
+            }
+        }
+
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds(), {
+                    padding: [20, 20]
+                });
+            }
+        }
+
+        function zoomToSanMiguelOverview() {
+            if (focusedCommunityLabel) {
+                map.removeLayer(focusedCommunityLabel);
+                focusedCommunityLabel = null;
+            }
+            if (sanMiguelBounds && sanMiguelBounds.isValid && sanMiguelBounds.isValid()) {
+                var panel = document.getElementById('habitants-panel');
+                var panelWidth = panel ? panel.offsetWidth : 0;
+                var leftPadding = Math.max(205, Math.round(panelWidth * 0.27));
+                var rightPadding = 34;
+                map.fitBounds(sanMiguelBounds, {
+                    paddingTopLeft: [leftPadding, 26],
+                    paddingBottomRight: [rightPadding, 26],
+                    animate: false
+                });
+                map.setZoom(Math.min(map.getZoom() + 1, 11), {animate: false});
+                return;
+            }
+            setBounds();
+        }
+
+        function addSanMiguelResetControl() {
+            var resetControl = L.control({position: 'topright'});
+            resetControl.onAdd = function() {
+                var container = L.DomUtil.create('div', 'leaflet-control-resetview leaflet-bar');
+                var button = L.DomUtil.create('button', '', container);
+                button.type = 'button';
+                button.innerHTML = '&#8962;';
+                button.title = 'Ver todo San Miguel';
+                button.setAttribute('aria-label', 'Ver todo San Miguel');
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.on(button, 'click', function(event) {
+                    L.DomEvent.stop(event);
+                    zoomToSanMiguelOverview();
+                });
+                return container;
+            };
+            resetControl.addTo(map);
+        }
+
+        function addOverlayLayer(name, layer, visible, includeInControl) {
+            if (includeInControl !== false) {
+                overlays[getLayerControlLabel(name)] = layer;
+            }
+            bounds_group.addLayer(layer);
+            if (visible) {
+                map.addLayer(layer);
+            }
+        }
+
+        function getFeaturePropertyTable(properties) {
+            var rows = Object.keys(properties || {}).map(function(key) {
+                var value = properties[key];
+                if (value === null || value === undefined || value === '') {
+                    return '';
+                }
+                return '<tr><th style="text-align:left; padding-right:8px;">' + fixText(key) + '</th><td>' + autolinker.link(fixText(String(value))) + '</td></tr>';
+            }).join('');
+            return rows ? '<table>' + rows + '</table>' : '<div>Sin atributos</div>';
+        }
+
+        function removeEmptyRowsFromPopupContent(content, feature) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var td = rows[i].querySelector('td.visible-with-data');
+                var key = td ? td.id : '';
+                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                    rows[i].parentNode.removeChild(rows[i]);
+                }
+            }
+            return tempDiv.innerHTML;
+        }
+
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (!imgTd) {
+                popup._contentNode.classList.remove('media');
+                return;
+            }
+            var src = imgTd.getAttribute('src');
+            if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                popup._contentNode.classList.add('media');
+                setTimeout(function() {
+                    popup.update();
+                }, 10);
+                return;
+            }
+            popup._contentNode.classList.remove('media');
+        }
+
+        function getDistrictFill(name) {
+            if (!districtColors[name]) {
+                if (districtColorOverrides[name]) {
+                    districtColors[name] = districtColorOverrides[name];
+                } else {
+                    districtColors[name] = districtPalette[districtColorIndex % districtPalette.length];
+                    districtColorIndex += 1;
+                }
+            }
+            return districtColors[name];
+        }
+
+        function getCommunityColor(name) {
+            var communityName = fixText(name || 'Sin comunidad');
+            if (!communityColors[communityName]) {
+                communityColors[communityName] = communityPalette[communityColorIndex % communityPalette.length];
+                communityColorIndex += 1;
+            }
+            return communityColors[communityName];
+        }
+
+        function getColorForLayer(name) {
+            var palette = {
+                'CAMINOS_Y_VIA_FERREA': '#8d9891',
+                'CAMINOS_Y_VIAS_SMV': '#c28b2c',
+                'Red_Vial_Fundamental_ABC_2017': '#3f667f',
+                'DISTRITOS': '#a5aa97',
+                'LimitesConcepcion': '#b55a3c',
+                'LimitesCuatroCañadas': '#b55a3c',
+                'LimitesSanAntonioLomerio': '#b55a3c',
+                'LimitesSanIgnacio': '#b55a3c',
+                'LimitesSanJoseChiquitos': '#b55a3c',
+                'LimitesSanMiguel': '#b55a3c',
+                'LimitesSanRafael': '#b55a3c'
+            };
+            return palette[name] || '#3388ff';
+        }
+
+        function getLayerControlLabel(name) {
+            var labels = {
+                'Encuestas': '<span class="layers-symbol point" style="background:#c27d38;"></span>Viviendas sin energía eléctrica',
+                'DISTRITOS': '<span class="layers-symbol box" style="background:#dfe8d8;"></span>Distritos',
+                'LimitesSanMiguel': '<span class="layers-symbol line dashed" style="border-top-color:' + getColorForLayer('LimitesSanMiguel') + ';"></span>Límite San Miguel',
+                'CAMINOS_Y_VIA_FERREA': '<span class="layers-symbol line thin" style="border-top-color:' + getColorForLayer('CAMINOS_Y_VIA_FERREA') + ';"></span>Caminos y vía férrea',
+                'CAMINOS_Y_VIAS_SMV': '<span class="layers-symbol line thin dashed" style="border-top-color:' + getColorForLayer('CAMINOS_Y_VIAS_SMV') + ';"></span>Caminos SMV',
+                'Red_Vial_Fundamental_ABC_2017': '<span class="layers-symbol line" style="border-top-color:' + getColorForLayer('Red_Vial_Fundamental_ABC_2017') + ';"></span>Red vial fundamental'
+            };
+            return labels[name] || name;
+        }
+
+        function isPointInRing(point, ring) {
+            var inside = false;
+            for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                var xi = ring[i][0], yi = ring[i][1];
+                var xj = ring[j][0], yj = ring[j][1];
+                var intersect = ((yi > point[1]) !== (yj > point[1])) &&
+                    (point[0] < (xj - xi) * (point[1] - yi) / ((yj - yi) || 1e-12) + xi);
+                if (intersect) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        function isPointInPolygon(point, polygonCoords) {
+            if (!polygonCoords || !polygonCoords.length || !isPointInRing(point, polygonCoords[0])) {
+                return false;
+            }
+            for (var i = 1; i < polygonCoords.length; i++) {
+                if (isPointInRing(point, polygonCoords[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function getDistrictForCoordinates(coords) {
+            if (!districtGeojsonData || !districtGeojsonData.features) {
+                return 'Sin distrito';
+            }
+            for (var i = 0; i < districtGeojsonData.features.length; i++) {
+                var feature = districtGeojsonData.features[i];
+                var geometry = feature.geometry || {};
+                var districtName = fixText((feature.properties && feature.properties.NOM) || 'Sin distrito');
+                if (geometry.type === 'Polygon' && isPointInPolygon(coords, geometry.coordinates)) {
+                    return districtName;
+                }
+                if (geometry.type === 'MultiPolygon') {
+                    for (var j = 0; j < geometry.coordinates.length; j++) {
+                        if (isPointInPolygon(coords, geometry.coordinates[j])) {
+                            return districtName;
+                        }
+                    }
+                }
+            }
+            return 'Sin distrito';
+        }
+
+        function buildCommunitiesByDistrict() {
+            var grouped = {};
+            if (!json_data_0 || !json_data_0.features) {
+                return grouped;
+            }
+            json_data_0.features.forEach(function(feature) {
+                if (!feature.geometry || feature.geometry.type !== 'Point') {
+                    return;
+                }
+                var districtName = getDistrictForCoordinates(feature.geometry.coordinates);
+                var communityName = fixText((feature.properties && feature.properties['_en_qu_comunidad_se_encuentra']) || 'Sin comunidad');
+                getCommunityColor(communityName);
+                if (!grouped[districtName]) {
+                    grouped[districtName] = {};
+                }
+                grouped[districtName][communityName] = true;
+            });
+            return grouped;
+        }
+
+        function renderLegend() {
+            var districtEntries = Object.keys(districtColors)
+                .sort(function(a, b) {
+                    return a.localeCompare(b, 'es');
+                })
+                .map(function(districtName) {
+                    return '<div class="legend-item"><span class="legend-box" style="background:' + districtColors[districtName] + ';"></span><span>' + districtName + '</span></div>';
+                })
+                .join('');
+
+            return [
+                '<div class="map-legend">',
+                '<h4>Simbología</h4>',
+                '<div class="legend-section">',
+                '<div class="legend-title">Distritos</div>',
+                '<div class="legend-communities">' + districtEntries + '</div>',
+                '</div>',
+                '</div>'
+            ].join('');
+        }
+
+        function updateLegendControl() {
+            if (!legendContainer && layersControl) {
+                addLegendControl();
+            }
+            if (legendContainer) {
+                legendContainer.innerHTML = renderLegend();
+            }
+            updateProjectSummary();
+        }
+
+        function addLegendControl() {
+            if (!layersControl || !layersControl.getContainer) {
+                return;
+            }
+            var layersContainer = layersControl.getContainer();
+            if (!layersContainer) {
+                return;
+            }
+            legendContainer = layersContainer.querySelector('.layers-inline-legend');
+            if (!legendContainer) {
+                legendContainer = L.DomUtil.create('div', 'layers-inline-legend');
+                var listContainer = layersContainer.querySelector('.leaflet-control-layers-list') || layersContainer;
+                listContainer.appendChild(legendContainer);
+                L.DomEvent.disableClickPropagation(legendContainer);
+            }
+            legendContainer.innerHTML = renderLegend();
+        }
+
+        function decorateLayersControl() {
+            if (!layersControl || !layersControl.getContainer) {
+                return;
+            }
+            var layersContainer = layersControl.getContainer();
+            if (!layersContainer) {
+                return;
+            }
+            var form = layersContainer.querySelector('form');
+            if (!form || form.querySelector('.layers-panel-heading')) {
+                return;
+            }
+            var heading = L.DomUtil.create('div', 'layers-panel-heading');
+            heading.innerHTML = '<h4 class="layers-panel-title">Capas</h4>';
+            form.insertBefore(heading, form.firstChild);
+        }
+
+        function formatMetricNumber(value) {
+            return Number(value || 0).toLocaleString('es-BO');
+        }
+
+        function formatSurveyDate(value) {
+            if (!value) {
+                return 'Sin fecha';
+            }
+            var date = new Date(value);
+            if (isNaN(date.getTime())) {
+                return 'Sin fecha';
+            }
+            return date.toLocaleDateString('es-BO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatShortCoordinates(coords) {
+            if (!coords || coords.length < 2) {
+                return 'Sin coordenadas';
+            }
+            return Number(coords[1]).toFixed(4) + ', ' + Number(coords[0]).toFixed(4);
+        }
+
+        function buildHabitantsSummary() {
+            var totals = {};
+            var totalHabitants = 0;
+            if (!json_data_0 || !json_data_0.features) {
+                return {rows: [], total: 0};
+            }
+            json_data_0.features.forEach(function(feature) {
+                var props = feature.properties || {};
+                var community = fixText(props['_en_qu_comunidad_se_encuentra'] || 'Sin comunidad');
+                var value = Number(props['Habitantes']);
+                if (!isFinite(value)) {
+                    value = Number(props['_cu_ntas_personas_viven_en_la_v']);
+                }
+                if (!isFinite(value)) {
+                    value = 0;
+                }
+                totals[community] = (totals[community] || 0) + value;
+                totalHabitants += value;
+            });
+            var rows = Object.keys(totals).map(function(name) {
+                return {name: name, value: totals[name]};
+            }).sort(function(a, b) {
+                return b.value - a.value || a.name.localeCompare(b.name, 'es');
+            });
+            return {rows: rows, total: totalHabitants};
+        }
+
+        function updateProjectSummary() {
+            var summary = buildHabitantsSummary();
+            var totalHabitantsEl = document.getElementById('project-total-habitants');
+            var totalCommunitiesEl = document.getElementById('project-total-communities');
+            var totalDistrictsEl = document.getElementById('project-total-districts');
+            var topCommunityEl = document.getElementById('project-top-community');
+            var topCommunityMetaEl = document.getElementById('project-top-community-meta');
+            var topCommunity = summary.rows.length ? summary.rows[0] : null;
+
+            if (totalHabitantsEl) {
+                totalHabitantsEl.textContent = formatMetricNumber(summary.total);
+            }
+            if (totalCommunitiesEl) {
+                totalCommunitiesEl.textContent = formatMetricNumber(summary.rows.length);
+            }
+            if (totalDistrictsEl) {
+                var districtNames = Object.keys(districtColors);
+                var totalDistricts = districtNames.length;
+                var interventionDistricts = districtNames.filter(function(name) {
+                    return name !== 'CAPITAL';
+                }).length;
+                totalDistrictsEl.textContent = interventionDistricts + '/' + totalDistricts;
+            }
+            if (topCommunityEl) {
+                topCommunityEl.textContent = topCommunity ? topCommunity.name : 'Sin dato';
+            }
+            if (topCommunityMetaEl) {
+                topCommunityMetaEl.textContent = topCommunity ? formatMetricNumber(topCommunity.value) + ' habitantes' : 'Sin registro';
+            }
+        }
+
+        function renderHabitantsChart() {
+            var container = document.getElementById('habitants-chart');
+            if (!container) {
+                return;
+            }
+            var summary = buildHabitantsSummary();
+            updateProjectSummary();
+            var rows = summary.rows;
+            if (!rows.length) {
+                container.innerHTML = '<p>Sin datos de habitantes.</p>';
+                return;
+            }
+            var panel = document.getElementById('habitants-panel');
+            var panelWidth = panel ? Math.max(panel.clientWidth - 8, 620) : 700;
+            var chartWidth = panelWidth;
+            var labelWidth = 205;
+            var valuePad = 34;
+            var leftPad = 4;
+            var rightPad = 8;
+            var topPad = 14;
+            var bottomPad = 28;
+            var rowHeight = 22;
+            var barHeight = 9;
+            var plotWidth = chartWidth - leftPad - labelWidth - valuePad - rightPad;
+            var height = topPad + rows.length * rowHeight + bottomPad;
+            var maxValue = rows[0].value || 1;
+            var ticks = [0, 50, 100, 150, 200, 250, 300];
+            if (maxValue > 300) {
+                ticks = [];
+                var step = Math.ceil(maxValue / 6 / 10) * 10;
+                for (var t = 0; t <= maxValue + step; t += step) {
+                    ticks.push(t);
+                }
+            }
+            var svg = [
+                '<svg viewBox="0 0 ' + chartWidth + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" aria-label="Habitantes por comunidad">'
+            ];
+            ticks.forEach(function(tick) {
+                var x = leftPad + labelWidth + (tick / ticks[ticks.length - 1]) * plotWidth;
+                svg.push('<line x1="' + x + '" y1="' + (topPad - 8) + '" x2="' + x + '" y2="' + (height - bottomPad + 2) + '" stroke="rgba(214, 227, 235, 0.28)" stroke-width="1"/>');
+                svg.push('<text x="' + x + '" y="' + (height - 6) + '" font-size="10" text-anchor="middle" fill="rgba(231, 240, 245, 0.72)">' + tick + '</text>');
+            });
+            rows.forEach(function(row, index) {
+                var y = topPad + index * rowHeight;
+                var barWidth = (row.value / ticks[ticks.length - 1]) * plotWidth;
+                var barColor = getCommunityColor(row.name);
+                var label = row.name;
+                var startX = leftPad + labelWidth;
+                svg.push('<rect class="chart-clickable" data-community="' + row.name.replace(/"/g, '&quot;') + '" x="' + leftPad + '" y="' + y + '" width="' + (chartWidth - leftPad - rightPad) + '" height="' + rowHeight + '" fill="transparent"/>');
+                svg.push('<text class="chart-clickable" data-community="' + row.name.replace(/"/g, '&quot;') + '" x="' + (startX - 8) + '" y="' + (y + 11) + '" font-size="10.5" text-anchor="end" fill="rgba(234, 242, 247, 0.84)">' + label + '</text>');
+                svg.push('<rect class="chart-clickable" data-community="' + row.name.replace(/"/g, '&quot;') + '" x="' + startX + '" y="' + (y + 3) + '" width="' + barWidth + '" height="' + barHeight + '" rx="2" fill="' + barColor + '"/>');
+                svg.push('<text class="chart-clickable" data-community="' + row.name.replace(/"/g, '&quot;') + '" x="' + (startX + barWidth + 6) + '" y="' + (y + 11) + '" font-size="10.5" fill="rgba(250, 252, 248, 0.94)">' + row.value + '</text>');
+            });
+            svg.push('</svg>');
+            container.innerHTML = svg.join('');
+            Array.prototype.forEach.call(container.querySelectorAll('[data-community]'), function(element) {
+                element.addEventListener('click', function() {
+                    zoomToCommunity(element.getAttribute('data-community'));
+                });
+            });
+        }
+
+        function zoomToCommunity(communityName) {
+            if (!layer_data_0) {
+                return;
+            }
+            var targetBounds = L.latLngBounds([]);
+            layer_data_0.eachLayer(function(layer) {
+                var layerCommunity = layer.feature && layer.feature.properties
+                    ? fixText(layer.feature.properties['_en_qu_comunidad_se_encuentra'] || 'Sin comunidad')
+                    : 'Sin comunidad';
+                if (layerCommunity === communityName) {
+                    if (layer.getLatLng) {
+                        targetBounds.extend(layer.getLatLng());
+                    } else if (layer.getBounds) {
+                        targetBounds.extend(layer.getBounds());
+                    }
+                }
+            });
+            if (targetBounds.isValid()) {
+                if (focusedCommunityLabel) {
+                    map.removeLayer(focusedCommunityLabel);
+                }
+                var labelHtml = fixText(communityName);
+                var labelLatLng = L.latLng(
+                    targetBounds.getNorth() + (targetBounds.getNorth() - targetBounds.getSouth()) * 0.12,
+                    targetBounds.getCenter().lng
+                );
+                focusedCommunityLabel = L.marker(labelLatLng, {
+                    pane: 'pane_labels',
+                    interactive: false,
+                    icon: L.divIcon({
+                        className: 'map-label community-focus-label',
+                        html: labelHtml
+                    })
+                }).addTo(map);
+                map.fitBounds(targetBounds.pad(0.35), {
+                    maxZoom: 16
+                });
+            }
+        }
+
+        function addCenterLabel(layer, text, className) {
+            if (!text || !layer.getBounds || !layer.getBounds().isValid()) {
+                return;
+            }
+            var center = layer.getBounds().getCenter();
+            var labelText = fixText(text);
+            if (labelText === 'LOMERIO') {
+                center = L.latLng(center.lat, center.lng - 0.2);
+            } else if (labelText === 'PROGRESO') {
+                center = L.latLng(center.lat - 0.075, center.lng - 0.05);
+            } else if (labelText === 'SAPOCO') {
+                center = L.latLng(center.lat, center.lng + 0.05);
+            }
+            var marker = L.marker(center, {
+                pane: 'pane_labels',
+                interactive: false,
+                icon: L.divIcon({
+                    className: 'map-label ' + className,
+                    html: labelText
+                })
+            });
+            addOverlayLayer('Etiqueta ' + labelText, marker, true, false);
+        }
+
+        function buildGeoJsonLayer(layerName, geojson) {
+            var color = getColorForLayer(layerName);
+            var isDistricts = layerName === 'DISTRITOS';
+            var isBoundary = layerName.indexOf('Limites') === 0;
+            var isRoads = layerName === 'CAMINOS_Y_VIA_FERREA';
+            var isMainRoads = layerName === 'Red_Vial_Fundamental_ABC_2017';
+            if (isDistricts) {
+                districtGeojsonData = geojson;
+            }
+
+            return L.geoJSON(geojson, {
+                pane: isDistricts ? 'pane_districts' : (isBoundary ? 'pane_boundaries' : 'pane_lines'),
+                style: function(feature) {
+                    var districtName = fixText((feature.properties && feature.properties.NOM) || '');
+                    var isSmvRoad = layerName === 'CAMINOS_Y_VIAS_SMV';
+                    return {
+                        color: color,
+                        weight: isBoundary ? 2.4 : (isMainRoads ? 2.0 : (isSmvRoad ? 0.9 : (isRoads ? 1.0 : 1))),
+                        opacity: isSmvRoad ? 0.8 : (isRoads ? 0.7 : 1),
+                        dashArray: isBoundary ? '7,4' : (isSmvRoad ? '3,3' : ''),
+                        fillColor: isDistricts ? getDistrictFill(districtName) : color,
+                        fillOpacity: isDistricts ? 0.7 : 0,
+                        interactive: true
+                    };
+                },
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        pane: 'pane_points',
+                        radius: 5,
+                        color: color,
+                        weight: 1,
+                        fillColor: color,
+                        fillOpacity: 0.85
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    if (layerName !== 'DISTRITOS' && layerName !== 'LimitesSanMiguel') {
+                        layer.bindPopup(getFeaturePropertyTable(feature.properties));
+                    }
+                    if (isDistricts && feature.properties && feature.properties.NOM) {
+                        addCenterLabel(layer, feature.properties.NOM, 'district-label');
+                    }
+                    if (isBoundary && feature.properties && feature.properties.MUNICIPIO && fixText(feature.properties.MUNICIPIO) !== 'San Miguel') {
+                        addCenterLabel(layer, feature.properties.MUNICIPIO, 'municipality-label');
+                    }
+                }
+            });
+        }
+
+        function pop_data_0(feature, layer) {
+            var properties = feature.properties || {};
+            var comunidad = feature.properties['_en_qu_comunidad_se_encuentra'] !== null
+                ? fixText(String(feature.properties['_en_qu_comunidad_se_encuentra']))
+                : 'Sin comunidad';
+            var habitantes = feature.properties['Habitantes'] !== null
+                ? String(feature.properties['Habitantes'])
+                : (feature.properties['_cu_ntas_personas_viven_en_la_v'] !== null
+                    ? String(feature.properties['_cu_ntas_personas_viven_en_la_v'])
+                    : 'Sin dato');
+            var fechaLevantamiento = formatSurveyDate(properties['CreationDate']);
+            var coordenadas = formatShortCoordinates(feature.geometry && feature.geometry.coordinates);
+            var foto = feature.properties['foto1'] !== null
+                ? 'images/' + String(feature.properties['foto1']).replace(/[\\/:]/g, '_').trim().replace(/'/g, '\'').replace(/"/g, '&quot;')
+                : '';
+            var popupContent = '<div class="survey-popup">\
+                    <h3>' + autolinker.link(comunidad) + '</h3>\
+                    <div class="survey-popup-meta-group">\
+                        <div class="survey-popup-meta"><i class="fas fa-users" aria-hidden="true"></i><strong>Habitantes</strong><span>' + autolinker.link(habitantes) + '</span></div>\
+                    </div>\
+                    ' + (foto ? '<figure><img src="' + foto + '" alt="' + comunidad + '"></figure>' : '') + '\
+                    <div class="survey-popup-details">\
+                        <div class="survey-popup-detail"><i class="fas fa-calendar-alt" aria-hidden="true"></i><span><strong>Levantamiento:</strong> ' + autolinker.link(fechaLevantamiento) + '</span></div>\
+                        <div class="survey-popup-detail"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span><strong>Coordenadas:</strong> ' + autolinker.link(coordenadas) + '</span></div>\
+                    </div>\
+                </div>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+            layer.on('popupopen', function(e) {
+                addClassToPopupIfMedia(content, e.popup);
+            });
+            layer.bindPopup(content, {maxWidth: 360, maxHeight: 460});
+        }
+
+        function style_data_0_0(feature) {
+            var community = feature && feature.properties
+                ? feature.properties['_en_qu_comunidad_se_encuentra']
+                : 'Sin comunidad';
+            var fillColor = getCommunityColor(community);
+            return {
+                pane: 'pane_points',
+                radius: 6,
+                opacity: 1,
+                color: fillColor,
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 0,
+                fill: true,
+                fillOpacity: 0.95,
+                fillColor: fillColor,
+                interactive: true
+            };
+        }
+
+        L.control.zoom({position: 'topright'}).addTo(map);
+        L.control.scale({
+            position: 'bottomright',
+            imperial: false,
+            maxWidth: 120
+        }).addTo(map);
+
+        var layer_data_0 = new L.geoJson(json_data_0, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_data_0',
+            layerName: 'layer_data_0',
+            pane: 'pane_points',
+            onEachFeature: pop_data_0,
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, style_data_0_0(feature));
+            }
+        });
+        addOverlayLayer('Encuestas', layer_data_0, true, true);
+        renderHabitantsChart();
+        window.addEventListener('resize', renderHabitantsChart);
+
+        var geojsonFiles = [
+            'CAMINOS_Y_VIA_FERREA.geojson',
+            'CAMINOS_Y_VIAS_SMV.geojson',
+            'DISTRITOS.geojson',
+            'LimitesSanMiguel.geojson',
+            'Red_Vial_Fundamental_ABC_2017.geojson'
+        ];
+        var visibleByDefault = {
+            'CAMINOS_Y_VIA_FERREA': true,
+            'CAMINOS_Y_VIAS_SMV': true,
+            'DISTRITOS': true,
+            'LimitesSanMiguel': true,
+            'Red_Vial_Fundamental_ABC_2017': true
+        };
+
+        Promise.all(
+            geojsonFiles.map(function(fileName) {
+                return fetch('data/' + fileName)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('No se pudo cargar ' + fileName);
+                        }
+                        return response.json();
+                    })
+                    .then(function(geojson) {
+                        var layerName = fileName.replace('.geojson', '');
+                        var layer = buildGeoJsonLayer(layerName, geojson);
+                        if (layerName === 'LimitesSanMiguel' && layer.getBounds && layer.getBounds().isValid()) {
+                            sanMiguelBounds = layer.getBounds();
+                        }
+                        addOverlayLayer(layerName, layer, !!visibleByDefault[layerName], true);
+                        updateLegendControl();
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+            })
+        ).finally(function() {
+            addSanMiguelResetControl();
+            layersControl = L.control.layers(null, overlays, {
+                collapsed: false
+            });
+            layersControl.addTo(map);
+            decorateLayersControl();
+            addLegendControl();
+            updateLegendControl();
+            zoomToSanMiguelOverview();
+        });
+        </script>
+    </body>
+</html>
