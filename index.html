@@ -1377,18 +1377,14 @@
         window.addEventListener('resize', renderHabitantsChart);
 
         var geojsonFiles = [
-            'CAMINOS_Y_VIA_FERREA.geojson',
             'CAMINOS_Y_VIAS_SMV.geojson',
             'DISTRITOS.geojson',
-            'LimitesSanMiguel.geojson',
-            'Red_Vial_Fundamental_ABC_2017.geojson'
+            'LimitesSanMiguel.geojson'
         ];
         var visibleByDefault = {
-            'CAMINOS_Y_VIA_FERREA': true,
             'CAMINOS_Y_VIAS_SMV': true,
             'DISTRITOS': true,
-            'LimitesSanMiguel': true,
-            'Red_Vial_Fundamental_ABC_2017': true
+            'LimitesSanMiguel': true
         };
 
         Promise.all(
