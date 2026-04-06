@@ -1,6 +1,7 @@
 # Encuesta de Electricidad
 
 Aplicación web interactiva para visualizar datos geoespaciales relacionados con encuestas de electricidad en diferentes distritos.
+Puedes visitarlo a través del siguiente link: https://es20hlcdl.github.io/electricidad/
 
 ## 🚀 Características
 
