@@ -652,6 +652,24 @@
         .panel-context-note strong {
             color: #fffaf0;
         }
+        .panel-contact {
+            display: inline;
+        }
+        .panel-contact a {
+            color: #eef7f1;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .panel-contact a::after {
+            content: "\f35d";
+            display: inline-block;
+            margin-left: 5px;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 10px;
+            color: #8fc6ff;
+        }
         .habitants-panel {
             position: absolute;
             top: 12px;
@@ -708,7 +726,7 @@
                 left: max(10px, env(safe-area-inset-left));
                 right: max(10px, env(safe-area-inset-right));
                 top: auto;
-                bottom: max(10px, env(safe-area-inset-bottom));
+                bottom: max(34px, calc(env(safe-area-inset-bottom) + 24px));
                 width: auto;
                 min-width: 0;
                 height: auto;
@@ -758,7 +776,11 @@
                 font-size: 12px;
             }
             .panel-context-note {
-                display: none;
+                display: block;
+                margin-top: 8px;
+                padding: 8px 10px;
+                font-size: 10.5px;
+                line-height: 1.32;
             }
             .panel-metrics {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -843,7 +865,7 @@
                 margin-right: 6px;
             }
             .habitants-panel {
-                max-height: 30vh;
+                max-height: min(38vh, 330px);
             }
             .panel-title {
                 font-size: 18px;
@@ -872,8 +894,7 @@
                 <p class="panel-kicker">Levantamiento de datos para proyectos de energía solar</p>
                 <h1 class="panel-title">Diagnóstico territorial</h1>
                 <p class="panel-description">
-                    Visualización del levantamiento realizado en San Miguel de Velasco para identificar
-                    concentración de habitantes y viviendas sin acceso a energía eléctrica.
+                    Este mapa permite identificar concentración de habitantes y viviendas sin acceso a energía eléctrica.
                 </p>
                 <div class="panel-metrics">
                     <div class="panel-stat">
@@ -895,9 +916,9 @@
                 </div>
                 
                 <div class="panel-context-note">
-                    <strong>Nota:</strong> La división política administrativa fue proporcionada por el GAMSMV.
-                    Algunas comunidades presentan conflictos de límites con otro municipio.
+                    <strong>Nota:</strong> La división política administrativa es referencial.
                     Por criterios de privacidad, no se exhiben todos los registros levantados.
+                    <span class="panel-contact">Para mayor información contactarse con: <a href="https://gustavocaceresmartinez.com/" target="_blank" rel="noopener noreferrer">Gustavo Abel Cáceres Martínez</a></span>
                 </div>
             </div>
             <h3>Habitantes por comunidad</h3>
